@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: invoice-app
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WKHTMLTOPDF_PATH
+        value: /usr/bin/wkhtmltopdf
