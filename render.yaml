@@ -1,14 +1,14 @@
 services:
   - type: web
-    name: invoice-app
+    name: invoice-generator
     env: docker
     plan: free
-    dockerfilePath: ./Dockerfile
     autoDeploy: true
+    branch: main
+    buildCommand: ""   # Dockerfile handles build
+    startCommand: ""   # Dockerfile CMD handles start
     envVars:
       - key: FLASK_ENV
         value: production
-      - key: SECRET_KEY
-        generateValue: true
-      - key: WKHTMLTOPDF_PATH
-        value: /usr/bin/wkhtmltopdf
+      - key: PORT
+        value: 5000
