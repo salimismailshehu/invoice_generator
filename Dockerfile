@@ -1,37 +1,33 @@
-# Use Ubuntu 20.04 LTS as base (wkhtmltopdf supported here)
-FROM ubuntu:20.04
+# Use an official lightweight Python image
+FROM python:3.10-slim
 
-# Prevent interactive prompts during package installs
+# Prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies and wkhtmltopdf
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
+# Install system dependencies for wkhtmltopdf and fonts
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
     wkhtmltopdf \
-    xfonts-75dpi \
-    xfonts-base \
+    fonts-dejavu \
     libxrender1 \
     libxext6 \
     libjpeg62-turbo \
-    libpng16-16 \
+    libpng-dev \
+    libfreetype6 \
     libx11-6 \
     && rm -rf /var/lib/apt/lists/*
 
-# Set workdir
+# Set work directory
 WORKDIR /app
 
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Copy project files
-COPY requirements.txt requirements.txt
-
-# Install Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-# Copy rest of the app
 COPY . .
 
-# Expose port (Render expects this)
+# Expose port
 EXPOSE 5000
 
-# Default run command
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+# Run the app with Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
