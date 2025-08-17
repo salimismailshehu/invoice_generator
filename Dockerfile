@@ -1,34 +1,37 @@
-# Use official Python slim image
-FROM python:3.9-slim
+# Use Ubuntu 20.04 LTS as base (wkhtmltopdf supported here)
+FROM ubuntu:20.04
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Prevent interactive prompts during package installs
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Set work directory
-WORKDIR /app
-
-# Install system dependencies including wkhtmltopdf
+# Install system dependencies and wkhtmltopdf
 RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
     wkhtmltopdf \
     xfonts-75dpi \
     xfonts-base \
     libxrender1 \
     libxext6 \
     libjpeg62-turbo \
-    libpng-dev \
+    libpng16-16 \
     libx11-6 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install pip dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Set workdir
+WORKDIR /app
 
 # Copy project files
+COPY requirements.txt requirements.txt
+
+# Install Python dependencies
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Copy rest of the app
 COPY . .
 
-# Expose port
+# Expose port (Render expects this)
 EXPOSE 5000
 
-# Command to run app
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# Default run command
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
